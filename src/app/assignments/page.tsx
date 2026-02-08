@@ -20,24 +20,27 @@ export default function AssignmentsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
 
-  const draftBase: Assignment = {
-    id: uid("assignment"),
-    classId: state.classes[0]?.id ?? "",
-    title: "",
-    description: "",
-    dueDate: new Date().toISOString().slice(0, 10),
-    dueTime: "23:59",
-    category: state.weightCategories[0]?.label ?? "General",
-    status: "On Track",
-    priority: "Medium",
-    tags: [],
-    reminderOffsets: [2880, 1440],
-    weight: 10,
-    completed: false,
-    studyLogs: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+  const draftBase = useMemo<Assignment>(
+    () => ({
+      id: uid("assignment"),
+      classId: state.classes[0]?.id ?? "",
+      title: "",
+      description: "",
+      dueDate: new Date().toISOString().slice(0, 10),
+      dueTime: "23:59",
+      category: state.weightCategories[0]?.label ?? "General",
+      status: "On Track",
+      priority: "Medium",
+      tags: [],
+      reminderOffsets: [2880, 1440],
+      weight: 10,
+      completed: false,
+      studyLogs: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }),
+    [state.classes, state.weightCategories]
+  );
 
   const [draft, setDraft] = useState<Assignment>(draftBase);
 
@@ -70,20 +73,47 @@ export default function AssignmentsPage() {
 
   const startEdit = (assignment: Assignment) => {
     setEditingId(assignment.id);
-    setDraft({ ...assignment });
-  };
-
-  const toggleReminder = (value: number) => {
-    setDraft((prev) => ({
-      ...prev,
-      reminderOffsets: prev.reminderOffsets.includes(value)
-        ? prev.reminderOffsets.filter((v) => v !== value)
-        : [...prev.reminderOffsets, value],
-    }));
+    setDraft({
+      ...assignment,
+      grade: assignment.grade ?? undefined,
+      dueDate: assignment.dueDate || new Date().toISOString().slice(0, 10),
+      dueTime: assignment.dueTime || "23:59",
+    });
   };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      {editingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-2xl rounded-3xl border border-slate-200/40 bg-white/95 p-6 shadow-2xl dark:border-white/10 dark:bg-ink-900/95">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-sand-50">Edit Assignment</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingId(null);
+                  setDraft({ ...draftBase, id: uid("assignment") });
+                }}
+                className="btn rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+              >
+                Close
+              </button>
+            </div>
+            <div className="mt-4">
+              <AssignmentForm
+                draft={draft}
+                setDraft={setDraft}
+                state={state}
+                reminderOptions={reminderOptions}
+                statusOptions={statusOptions}
+                primaryLabel="Update Assignment"
+                onPrimary={handleUpdate}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <section className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {[
@@ -96,7 +126,7 @@ export default function AssignmentsPage() {
               key={item.id}
               type="button"
               onClick={() => setFilter(item.id)}
-              className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] ${
+              className={`btn rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] ${
                 filter === item.id
                   ? "bg-slate-900 text-white dark:bg-sand-200 dark:text-ink-900"
                   : "border border-slate-200/60 bg-white text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
@@ -134,7 +164,7 @@ export default function AssignmentsPage() {
                   <button
                     type="button"
                     onClick={() => startEdit(assignment)}
-                    className="rounded-full border border-slate-200/60 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+                    className="btn rounded-full border border-slate-200/60 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
                   >
                     Edit
                   </button>
@@ -180,166 +210,193 @@ export default function AssignmentsPage() {
       </section>
 
       <section className="rounded-3xl border border-slate-200/40 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-ink-900/80">
-        <h3 className="text-xl font-semibold text-slate-900 dark:text-sand-50">
-          {editingId ? "Edit Assignment" : "New Assignment"}
-        </h3>
-        <div className="mt-4 grid gap-3 text-sm">
-          <input
-            value={draft.title}
-            onChange={(event) => setDraft({ ...draft, title: event.target.value })}
-            placeholder="Assignment title"
-            className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+        <h3 className="text-xl font-semibold text-slate-900 dark:text-sand-50">New Assignment</h3>
+        <div className="mt-4">
+          <AssignmentForm
+            draft={draft}
+            setDraft={setDraft}
+            state={state}
+            reminderOptions={reminderOptions}
+            statusOptions={statusOptions}
+            primaryLabel="Save Assignment"
+            onPrimary={handleSave}
           />
-          <textarea
-            value={draft.description}
-            onChange={(event) => setDraft({ ...draft, description: event.target.value })}
-            placeholder="Description"
-            className="min-h-[90px] rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-          />
-          <select
-            value={draft.classId}
-            onChange={(event) => setDraft({ ...draft, classId: event.target.value })}
-            className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-          >
-            {state.classes.map((cls) => (
-              <option key={cls.id} value={cls.id}>
-                {cls.name}
-              </option>
-            ))}
-          </select>
-          <div className="grid grid-cols-2 gap-2">
-            <input
-              type="date"
-              value={draft.dueDate}
-              onChange={(event) => setDraft({ ...draft, dueDate: event.target.value })}
-              className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-            />
-            <input
-              type="time"
-              value={draft.dueTime}
-              onChange={(event) => setDraft({ ...draft, dueTime: event.target.value })}
-              className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-            />
-          </div>
-          <select
-            value={draft.category}
-            onChange={(event) => {
-              const category = event.target.value;
-              const weight = state.weightCategories.find((c) => c.label === category)?.weight ?? draft.weight;
-              setDraft({ ...draft, category, weight });
-            }}
-            className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-          >
-            {state.weightCategories.map((category) => (
-              <option key={category.id} value={category.label}>
-                {category.label} ({category.weight}%)
-              </option>
-            ))}
-            <option value="Custom">Custom</option>
-          </select>
-          <div className="grid grid-cols-2 gap-2">
-            <select
-              value={draft.status}
-              onChange={(event) => setDraft({ ...draft, status: event.target.value as StatusTag })}
-              className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-            >
-              {statusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-            <select
-              value={draft.priority}
-              onChange={(event) => setDraft({ ...draft, priority: event.target.value as Assignment["priority"] })}
-              className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-            >
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
-          </div>
-          <label className="text-xs uppercase tracking-[0.3em] text-slate-400">Assignment Weight (%)</label>
-          <input
-            type="number"
-            min={0}
-            max={100}
-            value={draft.weight}
-            onChange={(event) => setDraft({ ...draft, weight: Number(event.target.value) })}
-            className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-          />
-          <div className="flex flex-wrap gap-2">
-            {statusOptions.map((tag) => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() =>
-                  setDraft((prev) => ({
-                    ...prev,
-                    tags: prev.tags.includes(tag)
-                      ? prev.tags.filter((t) => t !== tag)
-                      : [...prev.tags, tag],
-                  }))
-                }
-                className={`rounded-full px-3 py-1 text-xs ${
-                  draft.tags.includes(tag)
-                    ? "bg-slate-900 text-white dark:bg-sand-200 dark:text-ink-900"
-                    : "border border-slate-200/60 text-slate-600 dark:border-white/10 dark:text-sand-200"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Reminders</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              {reminderOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => toggleReminder(option.value)}
-                  className={`rounded-full px-3 py-1 text-xs ${
-                    draft.reminderOffsets.includes(option.value)
-                      ? "bg-slate-900 text-white dark:bg-sand-200 dark:text-ink-900"
-                      : "border border-slate-200/60 text-slate-600 dark:border-white/10 dark:text-sand-200"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <input
-            type="number"
-            min={0}
-            max={100}
-            value={draft.grade ?? ""}
-            onChange={(event) => setDraft({ ...draft, grade: Number(event.target.value) })}
-            placeholder="Grade (optional)"
-            className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
-          />
-          <div className="flex gap-2">
-            {editingId ? (
-              <button
-                type="button"
-                onClick={handleUpdate}
-                className="btn flex-1 rounded-full bg-slate-900 px-5 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-white dark:bg-sand-200 dark:text-ink-900"
-              >
-                Update Assignment
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSave}
-                className="btn flex-1 rounded-full bg-slate-900 px-5 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-white dark:bg-sand-200 dark:text-ink-900"
-              >
-                Save Assignment
-              </button>
-            )}
-          </div>
         </div>
       </section>
     </div>
   );
 }
+
+const AssignmentForm = ({
+  draft,
+  setDraft,
+  state,
+  reminderOptions,
+  statusOptions,
+  primaryLabel,
+  onPrimary,
+}: {
+  draft: Assignment;
+  setDraft: React.Dispatch<React.SetStateAction<Assignment>>;
+  state: ReturnType<typeof useAppStore>["state"];
+  reminderOptions: { label: string; value: number }[];
+  statusOptions: StatusTag[];
+  primaryLabel: string;
+  onPrimary: () => void;
+}) => {
+  const toggleReminder = (value: number) => {
+    setDraft((prev) => ({
+      ...prev,
+      reminderOffsets: prev.reminderOffsets.includes(value)
+        ? prev.reminderOffsets.filter((v) => v !== value)
+        : [...prev.reminderOffsets, value],
+    }));
+  };
+
+  return (
+    <div className="grid gap-3 text-sm">
+      <input
+        value={draft.title}
+        onChange={(event) => setDraft({ ...draft, title: event.target.value })}
+        placeholder="Assignment title"
+        className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+      />
+      <textarea
+        value={draft.description}
+        onChange={(event) => setDraft({ ...draft, description: event.target.value })}
+        placeholder="Description"
+        className="min-h-[90px] rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+      />
+      <select
+        value={draft.classId}
+        onChange={(event) => setDraft({ ...draft, classId: event.target.value })}
+        className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+      >
+        {state.classes.map((cls) => (
+          <option key={cls.id} value={cls.id}>
+            {cls.name}
+          </option>
+        ))}
+      </select>
+      <div className="grid grid-cols-2 gap-2">
+        <input
+          type="date"
+          value={draft.dueDate}
+          onChange={(event) => setDraft({ ...draft, dueDate: event.target.value })}
+          className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+        />
+        <input
+          type="time"
+          value={draft.dueTime}
+          onChange={(event) => setDraft({ ...draft, dueTime: event.target.value })}
+          className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+        />
+      </div>
+      <select
+        value={draft.category}
+        onChange={(event) => {
+          const category = event.target.value;
+          const weight = state.weightCategories.find((c) => c.label === category)?.weight ?? draft.weight;
+          setDraft({ ...draft, category, weight });
+        }}
+        className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+      >
+        {state.weightCategories.map((category) => (
+          <option key={category.id} value={category.label}>
+            {category.label} ({category.weight}%)
+          </option>
+        ))}
+        <option value="Custom">Custom</option>
+      </select>
+      <div className="grid grid-cols-2 gap-2">
+        <select
+          value={draft.status}
+          onChange={(event) => setDraft({ ...draft, status: event.target.value as StatusTag })}
+          className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+        >
+          {statusOptions.map((status) => (
+            <option key={status} value={status}>
+              {status}
+            </option>
+          ))}
+        </select>
+        <select
+          value={draft.priority}
+          onChange={(event) => setDraft({ ...draft, priority: event.target.value as Assignment["priority"] })}
+          className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+        >
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+      </div>
+      <label className="text-xs uppercase tracking-[0.3em] text-slate-400">Assignment Weight (%)</label>
+      <input
+        type="number"
+        min={0}
+        max={100}
+        value={draft.weight}
+        onChange={(event) => setDraft({ ...draft, weight: Number(event.target.value) })}
+        className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+      />
+      <div className="flex flex-wrap gap-2">
+        {statusOptions.map((tag) => (
+          <button
+            key={tag}
+            type="button"
+            onClick={() =>
+              setDraft((prev) => ({
+                ...prev,
+                tags: prev.tags.includes(tag) ? prev.tags.filter((t) => t !== tag) : [...prev.tags, tag],
+              }))
+            }
+            className={`btn rounded-full px-3 py-1 text-xs ${
+              draft.tags.includes(tag)
+                ? "bg-slate-900 text-white dark:bg-sand-200 dark:text-ink-900"
+                : "border border-slate-200/60 text-slate-600 dark:border-white/10 dark:text-sand-200"
+            }`}
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
+      <div>
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Reminders</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {reminderOptions.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => toggleReminder(option.value)}
+              className={`btn rounded-full px-3 py-1 text-xs ${
+                draft.reminderOffsets.includes(option.value)
+                  ? "bg-slate-900 text-white dark:bg-sand-200 dark:text-ink-900"
+                  : "border border-slate-200/60 text-slate-600 dark:border-white/10 dark:text-sand-200"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <input
+        type="number"
+        min={0}
+        max={100}
+        value={draft.grade ?? ""}
+        onChange={(event) => setDraft({ ...draft, grade: Number(event.target.value) })}
+        placeholder="Grade (optional)"
+        className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
+      />
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={onPrimary}
+          className="btn flex-1 rounded-full bg-slate-900 px-5 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-white dark:bg-sand-200 dark:text-ink-900"
+        >
+          {primaryLabel}
+        </button>
+      </div>
+    </div>
+  );
+};
