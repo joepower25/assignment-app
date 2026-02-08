@@ -418,15 +418,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const addChangelog = (item: ChangelogItem) => {
     setState((prev) => ({ ...prev, changelog: [item, ...prev.changelog] }));
-    void withUser((supabase, userId) =>
-      supabase.from("changelog").insert({
+    void withUser(async (supabase, userId) => {
+      await supabase.from("changelog").insert({
         id: item.id,
         user_id: userId,
         type: item.type,
         message: item.message,
         at: item.at,
-      })
-    );
+      });
+    });
   };
 
   const store = useMemo<AppStore>(
