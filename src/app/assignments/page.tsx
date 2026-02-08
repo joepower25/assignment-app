@@ -16,9 +16,10 @@ const reminderOptions = [
 ];
 
 export default function AssignmentsPage() {
-  const { state, addAssignment, updateAssignment } = useAppStore();
+  const { state, addAssignment, updateAssignment, deleteAssignment } = useAppStore();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
+  const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null);
 
   const draftBase = useMemo<Assignment>(
     () => ({
@@ -113,6 +114,35 @@ export default function AssignmentsPage() {
           </div>
         </div>
       )}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200/40 bg-white/95 p-6 shadow-2xl dark:border-white/10 dark:bg-ink-900/95">
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-sand-50">Delete Assignment</h3>
+            <p className="mt-2 text-sm text-slate-500 dark:text-sand-200">
+              This action cannot be undone. The assignment will be permanently removed.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="btn flex-1 rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteAssignment(deleteTarget.id);
+                  setDeleteTarget(null);
+                }}
+                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white"
+              >
+                Okay, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <section className="space-y-4">
         <div className="flex flex-wrap gap-2">
@@ -167,6 +197,13 @@ export default function AssignmentsPage() {
                     className="btn rounded-full border border-slate-200/60 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
                   >
                     Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleteTarget(assignment)}
+                    className="btn rounded-full border border-rose-200/60 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 dark:border-rose-200/20 dark:bg-ink-900 dark:text-rose-200"
+                  >
+                    Delete
                   </button>
                   <Link
                     href={`/assignments/${assignment.id}`}

@@ -21,6 +21,7 @@ type AppStore = {
   updateClass: (item: ClassItem) => void;
   addAssignment: (item: Assignment) => void;
   updateAssignment: (item: Assignment) => void;
+  deleteAssignment: (id: string) => void;
   addNote: (item: NoteItem) => void;
   updateNote: (item: NoteItem) => void;
   addChangelog: (item: ChangelogItem) => void;
@@ -350,6 +351,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const deleteAssignmentDb = async (id: string) => {
+    const { supabase, user } = await getSupabaseUser();
+    if (!user) return;
+    await supabase.from("study_logs").delete().eq("assignment_id", id);
+    await supabase.from("assignments").delete().eq("id", id);
+  };
+
   const persistNote = async (userId: string, note: NoteItem) => {
     const { supabase } = await getSupabaseUser();
     await supabase.from("notes").upsert({
@@ -495,6 +503,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         void withUser(async (_supabase, userId) => {
           await persistAssignment(userId, item);
         });
+      },
+      deleteAssignment: (id) => {
+        setState((prev) => ({
+          ...prev,
+          assignments: prev.assignments.filter((a) => a.id !== id),
+        }));
+        void deleteAssignmentDb(id);
       },
       addNote: (item) => {
         setState((prev) => ({ ...prev, notes: [item, ...prev.notes] }));
