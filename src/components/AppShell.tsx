@@ -10,6 +10,7 @@ const navItems = [
   { href: "/", label: "Home" },
   { href: "/calendar", label: "Calendar" },
   { href: "/assignments", label: "Assignments" },
+  { href: "/completed-assignments", label: "Completed" },
   { href: "/classes", label: "Classes" },
   { href: "/grades", label: "Grades" },
   { href: "/notes", label: "Notes" },

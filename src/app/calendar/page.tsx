@@ -33,6 +33,7 @@ export default function CalendarPage() {
   const assignmentsByDate = useMemo(() => {
     const map = new Map<string, typeof state.assignments>();
     state.assignments.forEach((assignment) => {
+      if (assignment.completed) return;
       map.set(assignment.dueDate, [...(map.get(assignment.dueDate) ?? []), assignment]);
     });
     return map;
@@ -52,7 +53,7 @@ export default function CalendarPage() {
   );
 
   const dayAssignments = state.assignments.filter(
-    (assignment) => assignment.dueDate === toLocalDateString(cursor)
+    (assignment) => assignment.dueDate === toLocalDateString(cursor) && !assignment.completed
   );
 
   return (

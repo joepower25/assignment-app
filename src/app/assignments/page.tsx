@@ -53,9 +53,9 @@ export default function AssignmentsPage() {
       return state.assignments.filter((a) => !a.completed);
     }
     if (filter === "urgent") {
-      return state.assignments.filter((a) => a.status === "Urgent");
+      return state.assignments.filter((a) => a.status === "Urgent" && !a.completed);
     }
-    return state.assignments;
+    return state.assignments.filter((a) => !a.completed);
   }, [filter, state.assignments]);
 
   const handleSave = () => {
