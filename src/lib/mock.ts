@@ -206,6 +206,11 @@ export const initialData: AppState = {
     { id: "9c3e1a22-3d1f-4f7a-8f87-ef3bbf3a2d41", label: "Final", weight: 40 },
     { id: "ed73d0c4-3c43-49aa-8f2d-55fb9b1f8df2", label: "Homework", weight: 5 },
   ],
+  workloadPulses: [
+    { id: "7e6f0c1b-6c2c-4c1d-9c0c-2d7e8a6b4f01", level: "Manageable", date: "2026-02-02", createdAt: now },
+    { id: "0b2a1c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d", level: "Overloaded", date: "2026-02-05", createdAt: now },
+    { id: "9f8e7d6c-5b4a-3c2d-1e0f-9a8b7c6d5e4f", level: "Light", date: "2026-02-07", createdAt: now },
+  ],
   changelog: [
     {
       id: "1c7b1d3b-6fa1-4e52-8f3c-fd5b5d52f8e1",

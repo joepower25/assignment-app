@@ -129,6 +129,14 @@ create table if not exists changelog (
   at timestamptz default now()
 );
 
+create table if not exists workload_pulses (
+  id uuid primary key default uuid_generate_v4(),
+  user_id uuid references auth.users(id) on delete cascade,
+  level text,
+  date date,
+  created_at timestamptz default now()
+);
+
 alter table profiles enable row level security;
 alter table terms enable row level security;
 alter table classes enable row level security;
@@ -142,6 +150,7 @@ alter table grade_scales enable row level security;
 alter table grade_ranges enable row level security;
 alter table weight_categories enable row level security;
 alter table changelog enable row level security;
+alter table workload_pulses enable row level security;
 
 create policy "Users can manage own profile" on profiles
   for all using (auth.uid() = id) with check (auth.uid() = id);
@@ -208,4 +217,7 @@ create policy "Users manage weight categories" on weight_categories
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 create policy "Users manage changelog" on changelog
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "Users manage workload pulses" on workload_pulses
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

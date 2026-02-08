@@ -14,6 +14,7 @@ const navItems = [
   { href: "/classes", label: "Classes" },
   { href: "/grades", label: "Grades" },
   { href: "/notes", label: "Notes" },
+  { href: "/workload-history", label: "Workload" },
   { href: "/search", label: "Search" },
   { href: "/export", label: "Export" },
   { href: "/changelog", label: "Changelog" },

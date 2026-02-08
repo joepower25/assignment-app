@@ -23,6 +23,7 @@ export default function ClassesPage() {
     syllabusUploads: [],
   });
   const [deleteTarget, setDeleteTarget] = useState<ClassItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSubmit = () => {
     if (!draft.name.trim()) return;
@@ -57,10 +58,15 @@ export default function ClassesPage() {
               <button
                 type="button"
                 onClick={() => {
-                  deleteClass(deleteTarget.id);
+                  if (!deleteTarget) return;
+                  setIsDeleting(true);
+                  const targetId = deleteTarget.id;
                   setDeleteTarget(null);
+                  deleteClass(targetId);
+                  setIsDeleting(false);
                 }}
-                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white"
+                disabled={isDeleting}
+                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Okay, Delete
               </button>

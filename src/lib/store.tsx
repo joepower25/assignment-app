@@ -9,6 +9,7 @@ import {
   NoteItem,
   Term,
   UserProfile,
+  WorkloadPulse,
 } from "./types";
 import { uid } from "./utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -25,6 +26,7 @@ type AppStore = {
   deleteAssignment: (id: string) => void;
   addNote: (item: NoteItem) => void;
   updateNote: (item: NoteItem) => void;
+  deleteNote: (id: string) => void;
   addChangelog: (item: ChangelogItem) => void;
   addGradeScale: (scale: GradeScale) => void;
   updateGradeScale: (scale: GradeScale) => void;
@@ -33,6 +35,7 @@ type AppStore = {
   addTerm: (term: Term) => void;
   updateTerm: (term: Term) => void;
   addBadge: (label: string) => void;
+  addWorkloadPulse: (item: WorkloadPulse) => void;
 };
 
 const AppStoreContext = createContext<AppStore | null>(null);
@@ -47,6 +50,7 @@ const loadInitialState = (): AppState => ({
   weightCategories: [],
   terms: [],
   changelog: [],
+  workloadPulses: [],
   ui: { completionStreak: 0, badges: [] },
 });
 
@@ -89,6 +93,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         gradeRangesRes,
         weightCategoriesRes,
         changelogRes,
+        workloadPulsesRes,
       ] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
         supabase.from("terms").select("*").order("start_date", { ascending: false }),
@@ -103,6 +108,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         supabase.from("grade_ranges").select("*"),
         supabase.from("weight_categories").select("*"),
         supabase.from("changelog").select("*").order("at", { ascending: false }),
+        supabase.from("workload_pulses").select("*").order("date", { ascending: false }),
       ]);
 
       const studyLogs = logsRes.data ?? [];
@@ -231,6 +237,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
             message: item.message,
             at: item.at,
           })) ?? prev.changelog,
+        workloadPulses:
+          workloadPulsesRes.data?.map((pulse: any) => ({
+            id: pulse.id,
+            level: pulse.level,
+            date: pulse.date,
+            createdAt: pulse.created_at ?? "",
+          })) ?? prev.workloadPulses,
       }));
       setHydrated(true);
     };
@@ -386,6 +399,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const deleteNoteDb = async (id: string) => {
+    const { supabase, user } = await getSupabaseUser();
+    if (!user) return;
+    await supabase.from("notes").delete().eq("id", id);
+  };
+
   const persistTerm = async (userId: string, term: Term) => {
     const { supabase } = await getSupabaseUser();
     await supabase.from("terms").upsert({
@@ -439,6 +458,17 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const { supabase } = await getSupabaseUser();
     await supabase.from("grade_scales").update({ active: false }).eq("user_id", userId);
     await supabase.from("grade_scales").update({ active: true }).eq("id", activeId);
+  };
+
+  const persistWorkloadPulse = async (userId: string, pulse: WorkloadPulse) => {
+    const { supabase } = await getSupabaseUser();
+    await supabase.from("workload_pulses").insert({
+      id: pulse.id,
+      user_id: userId,
+      level: pulse.level,
+      date: pulse.date,
+      created_at: pulse.createdAt ? new Date(pulse.createdAt) : undefined,
+    });
   };
 
   const addChangelog = (item: ChangelogItem) => {
@@ -561,6 +591,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
           await persistNote(userId, item);
         });
       },
+      deleteNote: (id) => {
+        setState((prev) => ({
+          ...prev,
+          notes: prev.notes.filter((note) => note.id !== id),
+        }));
+        void deleteNoteDb(id);
+      },
       addChangelog,
       addGradeScale: (scale) => {
         setState((prev) => ({
@@ -639,6 +676,15 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
             ],
           },
         })),
+      addWorkloadPulse: (item) => {
+        setState((prev) => ({
+          ...prev,
+          workloadPulses: [item, ...prev.workloadPulses],
+        }));
+        void withUser(async (_supabase, userId) => {
+          await persistWorkloadPulse(userId, item);
+        });
+      },
     }),
     [state]
   );

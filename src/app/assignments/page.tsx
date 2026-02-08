@@ -20,6 +20,7 @@ export default function AssignmentsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState<Assignment | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const draftBase = useMemo<Assignment>(
     () => ({
@@ -134,10 +135,15 @@ export default function AssignmentsPage() {
               <button
                 type="button"
                 onClick={() => {
-                  deleteAssignment(deleteTarget.id);
+                  if (!deleteTarget) return;
+                  setIsDeleting(true);
+                  const targetId = deleteTarget.id;
                   setDeleteTarget(null);
+                  deleteAssignment(targetId);
+                  setIsDeleting(false);
                 }}
-                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white"
+                disabled={isDeleting}
+                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Okay, Delete
               </button>

@@ -1,5 +1,6 @@
 export type StatusTag = "Urgent" | "In Progress" | "Blocked" | "On Track" | "Completed";
 export type Priority = "Low" | "Medium" | "High";
+export type WorkloadLevel = "Light" | "Manageable" | "Overloaded";
 
 export type GradeRange = {
   label: string;
@@ -123,6 +124,13 @@ export type WeightCategory = {
   weight: number;
 };
 
+export type WorkloadPulse = {
+  id: string;
+  level: WorkloadLevel;
+  date: string;
+  createdAt: string;
+};
+
 export type AppState = {
   user: UserProfile;
   classes: ClassItem[];
@@ -133,6 +141,7 @@ export type AppState = {
   weightCategories: WeightCategory[];
   terms: Term[];
   changelog: ChangelogItem[];
+  workloadPulses: WorkloadPulse[];
   ui: {
     completionStreak: number;
     badges: Badge[];

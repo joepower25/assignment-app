@@ -7,6 +7,7 @@ import { formatDate } from "@/lib/utils";
 export default function CompletedAssignmentsPage() {
   const { state, updateAssignment, deleteAssignment } = useAppStore();
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const completed = state.assignments.filter((a) => a.completed);
 
   return (
@@ -29,10 +30,15 @@ export default function CompletedAssignmentsPage() {
               <button
                 type="button"
                 onClick={() => {
-                  deleteAssignment(deleteTarget);
+                  if (!deleteTarget) return;
+                  setIsDeleting(true);
+                  const targetId = deleteTarget;
                   setDeleteTarget(null);
+                  deleteAssignment(targetId);
+                  setIsDeleting(false);
                 }}
-                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white"
+                disabled={isDeleting}
+                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Okay, Delete
               </button>

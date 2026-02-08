@@ -1,14 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { NoteItem } from "@/lib/types";
 import { uid } from "@/lib/utils";
 
 export default function NotesPage() {
-  const { state, addNote, updateNote } = useAppStore();
+  const { state, addNote, updateNote, deleteNote } = useAppStore();
   const [selected, setSelected] = useState<NoteItem | null>(state.notes[0] ?? null);
   const [tagInput, setTagInput] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<NoteItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!selected && state.notes.length) {
+      setSelected(state.notes[0]);
+      return;
+    }
+    if (selected && !state.notes.some((note) => note.id === selected.id)) {
+      setSelected(state.notes[0] ?? null);
+    }
+  }, [selected, state.notes]);
 
   const handleSave = () => {
     if (!selected) return;
@@ -43,6 +55,47 @@ export default function NotesPage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200/40 bg-white/95 p-6 shadow-2xl dark:border-white/10 dark:bg-ink-900/95">
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-sand-50">Delete Note</h3>
+            <p className="mt-2 text-sm text-slate-500 dark:text-sand-200">
+              This action cannot be undone. The note will be permanently removed.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="btn flex-1 rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!deleteTarget) return;
+                  setIsDeleting(true);
+                  const removedId = deleteTarget.id;
+                  setDeleteTarget(null);
+                  deleteNote(removedId);
+                  if (selected?.id === removedId) {
+                    const next =
+                      state.notes
+                        .filter((note) => note.id !== removedId)
+                        .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? ""))[0] ?? null;
+                    setSelected(next);
+                  }
+                  setIsDeleting(false);
+                }}
+                disabled={isDeleting}
+                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Okay, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <section className="space-y-4">
         <button
           type="button"
@@ -131,6 +184,13 @@ export default function NotesPage() {
                 className="btn rounded-full bg-slate-900 px-5 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-white dark:bg-sand-200 dark:text-ink-900"
               >
                 Save Note
+              </button>
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(selected)}
+                className="btn rounded-full border border-rose-200/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 dark:border-rose-200/20 dark:text-rose-200"
+              >
+                Delete Note
               </button>
               <button
                 type="button"

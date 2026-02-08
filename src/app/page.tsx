@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { addDays, formatDate, getToday, sum } from "@/lib/utils";
+import { addDays, formatDate, getToday, sum, uid } from "@/lib/utils";
+import { WorkloadLevel } from "@/lib/types";
 
 export default function HomePage() {
-  const { state } = useAppStore();
+  const { state, addWorkloadPulse } = useAppStore();
   const today = getToday();
-  const [pulse, setPulse] = useState<string | null>(null);
+  const [pulse, setPulse] = useState<WorkloadLevel | null>(null);
 
   const dueToday = state.assignments.filter((a) => a.dueDate === today);
   const upcomingWeek = state.assignments.filter(
@@ -194,15 +195,23 @@ export default function HomePage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {["Light", "Manageable", "Overloaded"].map((level) => (
+            {(["Light", "Manageable", "Overloaded"] as WorkloadLevel[]).map((level) => (
               <button
                 key={level}
                 type="button"
-                onClick={() => setPulse(level)}
+                onClick={() => {
+                  setPulse(level);
+                  addWorkloadPulse({
+                    id: uid("pulse"),
+                    level,
+                    date: today,
+                    createdAt: new Date().toISOString(),
+                  });
+                }}
                 className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition hover:-translate-y-0.5 hover:shadow-sm ${
                   pulse === level
-                    ? "border-slate-900 bg-slate-900 text-white dark:border-sand-200 dark:bg-sand-200 dark:text-ink-900"
-                    : "border-slate-200/60 bg-white text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+                    ? "border-slate-900 bg-slate-900 text-white shadow-md dark:border-sand-200 dark:bg-sand-200 dark:text-ink-900"
+                    : "border-slate-300 bg-white text-slate-900 hover:bg-slate-100 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200 dark:hover:bg-white/10"
                 }`}
               >
                 {level}
@@ -210,7 +219,15 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900 dark:border-emerald-400/40 dark:bg-emerald-900/20 dark:text-emerald-100">
+        <div
+          className={`mt-4 rounded-2xl border px-4 py-3 text-xs ${
+            pulse === "Overloaded"
+              ? "border-rose-200/70 bg-rose-50 text-rose-900 dark:border-rose-400/40 dark:bg-rose-900/20 dark:text-rose-100"
+              : pulse === "Light"
+                ? "border-emerald-200/70 bg-emerald-50 text-emerald-900 dark:border-emerald-400/40 dark:bg-emerald-900/20 dark:text-emerald-100"
+                : "border-amber-200/70 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-900/20 dark:text-amber-100"
+          }`}
+        >
           {pulse
             ? `Thanks for checking in. Based on "${pulse}", take a 5-minute breathing reset between study blocks.`
             : "Tip: Take a 5-minute breathing reset between study blocks. Link: a short guided meditation."}
