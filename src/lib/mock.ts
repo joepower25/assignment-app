@@ -1,0 +1,220 @@
+import { AppState } from "./types";
+
+const now = "2026-02-07T12:00:00.000Z";
+
+const termId = "1b5c1f3d-9c1f-4b74-8d78-2e4d9a6d7c01";
+const classBioId = "5c2a8b8a-7f3a-4b2b-9e9e-9b5e8c0b7a11";
+const classPsycId = "8e2e2db7-7b52-4c3a-9f3c-2e8f1b7f3c55";
+
+export const initialData: AppState = {
+  user: {
+    id: "b8c4f6bb-5f7b-4b42-9e7f-3d2b2f39f1b2",
+    name: "Jordan Lee",
+    email: "jordan@university.edu",
+  },
+  terms: [
+    {
+      id: termId,
+      name: "Spring 2026",
+      startDate: "2026-01-12",
+      endDate: "2026-05-15",
+      active: true,
+    },
+  ],
+  classes: [
+    {
+      id: classBioId,
+      name: "BIO 210 - Genetics",
+      color: "#38bdf8",
+      instructor: "Dr. Vega",
+      officeHours: "Tue 2-4 PM, Lab 113",
+      location: "Science Hall 204",
+      credits: 4,
+      termId,
+      resources: [
+        { id: "2bd0a3cc-1f2b-4b98-8b09-4512b33b3ad1", label: "Textbook", url: "https://example.com" },
+        { id: "836c7a21-03fa-4c3a-8d4f-48df5b1d5b87", label: "Lecture Slides", url: "https://example.com" },
+      ],
+      syllabusUploads: [
+        {
+          id: "f1f39a64-8a67-4bd5-9df5-7a3f6bda2b99",
+          fileName: "BIO210-Spring-2026.pdf",
+          extractedItems: [
+            {
+              id: "b97f4f0a-c402-45b6-8f3d-2ddc2de40bb1",
+              type: "assignment",
+              title: "Lab Report 2",
+              date: "2026-02-18",
+              time: "23:59",
+            },
+            {
+              id: "9e4b3a7f-1a4d-46e6-8a1b-2f59f4a8b33a",
+              type: "exam",
+              title: "Midterm Exam",
+              date: "2026-03-12",
+              time: "09:00",
+            },
+            {
+              id: "9b5f3b42-1ec5-4f56-a2ac-9d0c1c2e9e4f",
+              type: "reading",
+              title: "Chapter 7 Reading",
+              date: "2026-02-14",
+              ambiguous: true,
+              notes: "Listed as 'TBD' in syllabus",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: classPsycId,
+      name: "PSYC 101 - Intro to Psychology",
+      color: "#f59e0b",
+      instructor: "Prof. Chen",
+      officeHours: "Thu 10-12 AM, Zoom",
+      location: "Humanities 110",
+      credits: 3,
+      termId,
+      resources: [
+        { id: "c3afdd1a-f9d7-4f1e-9f78-2ed3b7e7e223", label: "YouTube Playlist", url: "https://example.com" },
+      ],
+      syllabusUploads: [],
+    },
+  ],
+  assignments: [
+    {
+      id: "9f9b673c-6ff4-4f60-9d8e-1b7c8d3c1f55",
+      classId: classBioId,
+      title: "Genetics Case Study",
+      description: "Analyze three case studies and submit a summary.",
+      dueDate: "2026-02-10",
+      dueTime: "23:59",
+      category: "Case Study",
+      status: "Urgent",
+      priority: "High",
+      tags: ["Lab", "Write-up"],
+      reminderOffsets: [10080, 2880, 120],
+      weight: 15,
+      grade: 92,
+      completed: false,
+      studyLogs: [
+        { id: "45fbb4b5-b186-46f1-b09b-9b99a9df7f1e", minutes: 90, date: "2026-02-05" },
+        { id: "9c3d48de-c2b0-4ae7-9c1b-5e4f4d3f2bb3", minutes: 60, date: "2026-02-06" },
+      ],
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "40f5e5a2-6c0d-4d1c-9b69-2e5d3d0b6e12",
+      classId: classPsycId,
+      title: "Cognitive Bias Quiz",
+      description: "Complete quiz in LMS.",
+      dueDate: "2026-02-11",
+      dueTime: "18:00",
+      category: "Quiz",
+      status: "In Progress",
+      priority: "Medium",
+      tags: ["Quiz"],
+      reminderOffsets: [2880, 1440],
+      weight: 10,
+      grade: 88,
+      completed: true,
+      studyLogs: [{ id: "0f2f8e9a-1c52-4b9f-8a97-0c6bb0d67f11", minutes: 45, date: "2026-02-06" }],
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      id: "c5b21a2a-7f2b-4684-9cb4-f1e77b67bffa",
+      classId: classBioId,
+      title: "Lab Report 2",
+      description: "Results + discussion section.",
+      dueDate: "2026-02-18",
+      dueTime: "23:59",
+      category: "Lab",
+      status: "On Track",
+      priority: "High",
+      tags: ["Lab"],
+      reminderOffsets: [10080, 2880, 1440],
+      weight: 20,
+      completed: false,
+      studyLogs: [],
+      createdAt: now,
+      updatedAt: now,
+    },
+  ],
+  notes: [
+    {
+      id: "b1bc5a7e-30c4-4c4f-8df6-9d3d3d77a4f0",
+      title: "BIO 210 - Week 4",
+      content: "- Linkage disequilibrium\n- Hardy-Weinberg practice\n- Lab safety updates",
+      tags: ["bio", "week4"],
+      createdAt: "2026-02-02",
+      updatedAt: "2026-02-05",
+    },
+    {
+      id: "5edb7a52-9500-4f3f-9f38-0c3a3f3d00a4",
+      title: "PSYC - Study Guide",
+      content: "Focus on cognitive biases, heuristics, and memory models.",
+      tags: ["psyc", "exam"],
+      createdAt: "2026-02-03",
+      updatedAt: "2026-02-06",
+    },
+  ],
+  gradeScales: [
+    {
+      id: "f4c346a0-7a9b-4d6a-9aa6-779aef0ab234",
+      name: "Standard A-F",
+      ranges: [
+        { label: "A", min: 90, max: 100 },
+        { label: "B", min: 80, max: 89 },
+        { label: "C", min: 70, max: 79 },
+        { label: "D", min: 60, max: 69 },
+        { label: "F", min: 0, max: 59 },
+      ],
+    },
+    {
+      id: "ab233b98-6f5f-4f4f-9f86-0f9a8b8c0c21",
+      name: "Plus/Minus",
+      ranges: [
+        { label: "A", min: 93, max: 100 },
+        { label: "A-", min: 90, max: 92 },
+        { label: "B+", min: 87, max: 89 },
+        { label: "B", min: 83, max: 86 },
+        { label: "B-", min: 80, max: 82 },
+        { label: "C+", min: 77, max: 79 },
+        { label: "C", min: 73, max: 76 },
+        { label: "C-", min: 70, max: 72 },
+        { label: "D", min: 60, max: 69 },
+        { label: "F", min: 0, max: 59 },
+      ],
+    },
+  ],
+  activeGradeScaleId: "f4c346a0-7a9b-4d6a-9aa6-779aef0ab234",
+  weightCategories: [
+    { id: "57e0f3b4-1f65-48b9-bf61-25d1e8c6b93d", label: "Quiz", weight: 10 },
+    { id: "c7f93f56-1960-4324-8a21-20f0f248ec6f", label: "Midterm", weight: 30 },
+    { id: "9c3e1a22-3d1f-4f7a-8f87-ef3bbf3a2d41", label: "Final", weight: 40 },
+    { id: "ed73d0c4-3c43-49aa-8f2d-55fb9b1f8df2", label: "Homework", weight: 5 },
+  ],
+  changelog: [
+    {
+      id: "1c7b1d3b-6fa1-4e52-8f3c-fd5b5d52f8e1",
+      type: "assignment",
+      message: "Created Genetics Case Study (BIO 210)",
+      at: "2026-02-04T10:00:00.000Z",
+    },
+    {
+      id: "f7c9f2a2-5945-4c25-94a0-6af1f1b3f0f5",
+      type: "class",
+      message: "Updated office hours for PSYC 101",
+      at: "2026-02-05T16:30:00.000Z",
+    },
+  ],
+  ui: {
+    completionStreak: 6,
+    badges: [
+      { id: "e8c7d6a5-8c2e-4d9f-9f59-9e3b78e7f7d1", label: "On-Time Finisher", earnedAt: "2026-02-03" },
+      { id: "0e2d4a13-2f9a-4d8e-82a9-02c8f7e2f2c3", label: "Consistency 5x", earnedAt: "2026-02-06" },
+    ],
+  },
+};
