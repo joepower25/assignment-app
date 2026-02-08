@@ -129,6 +129,7 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
                   const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
                   const supabase = createSupabaseBrowserClient();
                   await supabase.auth.signOut();
+                  window.location.reload();
                 }}
                 className="btn rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-100 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200 dark:hover:bg-white/10"
               >

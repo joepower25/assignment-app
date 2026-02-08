@@ -220,12 +220,12 @@ export default function HomePage() {
           </div>
         </div>
         <div
-          className={`mt-4 rounded-2xl border px-4 py-3 text-xs ${
+          className={`mt-4 rounded-2xl border px-4 py-3 text-sm font-semibold ${
             pulse === "Overloaded"
-              ? "border-rose-200/70 bg-rose-50 text-rose-900 dark:border-rose-400/40 dark:bg-rose-900/20 dark:text-rose-100"
+              ? "border-rose-400 bg-rose-100 text-black dark:border-rose-400/40 dark:bg-rose-900/20 dark:text-rose-100"
               : pulse === "Light"
-                ? "border-emerald-200/70 bg-emerald-50 text-emerald-900 dark:border-emerald-400/40 dark:bg-emerald-900/20 dark:text-emerald-100"
-                : "border-amber-200/70 bg-amber-50 text-amber-900 dark:border-amber-400/40 dark:bg-amber-900/20 dark:text-amber-100"
+                ? "border-emerald-400 bg-emerald-100 text-neutral-950 dark:border-emerald-200/60 dark:bg-emerald-200/90 dark:text-neutral-950"
+                : "border-amber-400 bg-amber-100 text-neutral-950 dark:border-amber-200/60 dark:bg-amber-200/90 dark:text-neutral-950"
           }`}
         >
           {pulse

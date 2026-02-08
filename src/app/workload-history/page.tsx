@@ -21,6 +21,15 @@ const levelText = {
   Overloaded: "text-rose-900 dark:text-rose-100",
 } satisfies Record<WorkloadLevel, string>;
 
+const levelPill = {
+  Light:
+    "border-emerald-300 bg-emerald-100 text-neutral-950 dark:border-emerald-200/60 dark:bg-emerald-200/90 dark:text-neutral-950",
+  Manageable:
+    "border-amber-300 bg-amber-100 text-neutral-950 dark:border-amber-200/60 dark:bg-amber-200/90 dark:text-neutral-950",
+  Overloaded:
+    "border-rose-300 bg-rose-100 text-neutral-950 dark:border-rose-200/60 dark:bg-rose-200/90 dark:text-neutral-950",
+} satisfies Record<WorkloadLevel, string>;
+
 const parseDate = (value: string) => {
   const [year, month, day] = value.split("-").map(Number);
   if (!year || !month || !day) return new Date(value);
@@ -36,8 +45,10 @@ const formatMonth = (date: Date) =>
 const formatYear = (date: Date) => date.getFullYear().toString();
 
 export default function WorkloadHistoryPage() {
-  const { state } = useAppStore();
+  const { state, deleteWorkloadPulse } = useAppStore();
   const [view, setView] = useState<ViewMode>("weekly");
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const pulses = useMemo(() => {
     return state.workloadPulses
@@ -113,6 +124,40 @@ export default function WorkloadHistoryPage() {
 
   return (
     <div className="space-y-6">
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200/40 bg-white/95 p-6 shadow-2xl dark:border-white/10 dark:bg-ink-900/95">
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-sand-50">Delete Check-in</h3>
+            <p className="mt-2 text-sm text-slate-500 dark:text-sand-200">
+              This action cannot be undone. The workload check-in will be permanently removed.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="btn flex-1 rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!deleteTarget) return;
+                  setIsDeleting(true);
+                  const targetId = deleteTarget;
+                  setDeleteTarget(null);
+                  deleteWorkloadPulse(targetId);
+                  setIsDeleting(false);
+                }}
+                disabled={isDeleting}
+                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Okay, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <section className="rounded-3xl border border-slate-200/40 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-ink-900/80">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
@@ -200,10 +245,21 @@ export default function WorkloadHistoryPage() {
               key={pulse.id}
               className="flex items-center justify-between rounded-2xl border border-slate-200/60 px-3 py-2 text-xs dark:border-white/10"
             >
-              <span className="text-slate-500 dark:text-sand-200">{pulse.date}</span>
-              <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${levelText[pulse.level]}`}>
-                {pulse.level}
-              </span>
+              <span className="text-neutral-950 dark:text-sand-200">{pulse.date}</span>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${levelPill[pulse.level]}`}
+                >
+                  {pulse.level}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(pulse.id)}
+                  className="rounded-full border border-rose-200/60 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-600 dark:border-rose-200/20 dark:text-rose-200"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
           {pulses.length === 0 && (

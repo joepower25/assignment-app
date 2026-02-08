@@ -36,6 +36,7 @@ type AppStore = {
   updateTerm: (term: Term) => void;
   addBadge: (label: string) => void;
   addWorkloadPulse: (item: WorkloadPulse) => void;
+  deleteWorkloadPulse: (id: string) => void;
 };
 
 const AppStoreContext = createContext<AppStore | null>(null);
@@ -471,6 +472,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const deleteWorkloadPulseDb = async (id: string) => {
+    const { supabase, user } = await getSupabaseUser();
+    if (!user) return;
+    await supabase.from("workload_pulses").delete().eq("id", id);
+  };
+
   const addChangelog = (item: ChangelogItem) => {
     setState((prev) => ({ ...prev, changelog: [item, ...prev.changelog] }));
     void (async () => {
@@ -684,6 +691,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         void withUser(async (_supabase, userId) => {
           await persistWorkloadPulse(userId, item);
         });
+      },
+      deleteWorkloadPulse: (id) => {
+        setState((prev) => ({
+          ...prev,
+          workloadPulses: prev.workloadPulses.filter((pulse) => pulse.id !== id),
+        }));
+        void deleteWorkloadPulseDb(id);
       },
     }),
     [state]
