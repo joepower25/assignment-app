@@ -245,10 +245,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     if (!hasEnv) setHydrated(true);
   }, []);
 
-  const withUser = async <T,>(fn: (supabase: ReturnType<typeof createSupabaseBrowserClient>, userId: string) => Promise<T>) => {
+  const withUser = async <T,>(
+    fn: (supabase: ReturnType<typeof createSupabaseBrowserClient>, userId: string) => T | Promise<T>
+  ) => {
     const { supabase, user } = await getSupabaseUser();
     if (!user) return null;
-    return fn(supabase, user.id);
+    return Promise.resolve(fn(supabase, user.id));
   };
 
   const persistProfile = async (userId: string) => {
