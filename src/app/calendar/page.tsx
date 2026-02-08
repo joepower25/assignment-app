@@ -16,12 +16,17 @@ export default function CalendarPage() {
   const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
   const days = daysInMonth(cursor.getFullYear(), cursor.getMonth());
   const startDay = (monthStart.getDay() + 6) % 7;
+  const toLocalDateString = (date: Date) => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const dd = String(date.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
+
   const cells = Array.from({ length: startDay + days }, (_, i) => {
     const dayIndex = i - startDay + 1;
     if (dayIndex <= 0) return null;
-    const date = new Date(cursor.getFullYear(), cursor.getMonth(), dayIndex)
-      .toISOString()
-      .slice(0, 10);
+    const date = toLocalDateString(new Date(cursor.getFullYear(), cursor.getMonth(), dayIndex));
     return date;
   });
 
@@ -43,13 +48,11 @@ export default function CalendarPage() {
   const dayOfWeek = weekStart.getDay();
   weekStart.setDate(weekStart.getDate() - ((dayOfWeek + 6) % 7));
   const weekDays = Array.from({ length: 7 }, (_, i) =>
-    new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i)
-      .toISOString()
-      .slice(0, 10)
+    toLocalDateString(new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate() + i))
   );
 
   const dayAssignments = state.assignments.filter(
-    (assignment) => assignment.dueDate === cursor.toISOString().slice(0, 10)
+    (assignment) => assignment.dueDate === toLocalDateString(cursor)
   );
 
   return (
@@ -182,7 +185,7 @@ export default function CalendarPage() {
             </div>
           </div>
           <h3 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-sand-50">
-            {formatDate(cursor.toISOString().slice(0, 10))}
+            {formatDate(toLocalDateString(cursor))}
           </h3>
           <div className="mt-4 grid gap-3">
             {dayAssignments.length === 0 && (

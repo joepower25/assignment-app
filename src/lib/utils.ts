@@ -1,7 +1,13 @@
 export const toDateKey = (date: string) => date;
 
+const parseLocalDate = (date: string) => {
+  const [year, month, day] = date.split("-").map(Number);
+  if (!year || !month || !day) return new Date(date);
+  return new Date(year, month - 1, day);
+};
+
 export const formatDate = (date: string) => {
-  const d = new Date(date);
+  const d = parseLocalDate(date);
   return d.toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -9,7 +15,7 @@ export const formatDate = (date: string) => {
 };
 
 export const formatLongDate = (date: string) => {
-  const d = new Date(date);
+  const d = parseLocalDate(date);
   return d.toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",

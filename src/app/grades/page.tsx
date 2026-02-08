@@ -39,6 +39,7 @@ export default function GradesPage() {
   const { state, addGradeScale, updateGradeScale, setActiveGradeScale, updateAssignment } = useAppStore();
   const [whatIfScore, setWhatIfScore] = useState(85);
   const [targetGpa, setTargetGpa] = useState(3.5);
+  const [newRange, setNewRange] = useState({ label: "", min: 0, max: 0 });
 
   const activeScale = state.gradeScales.find((scale) => scale.id === state.activeGradeScaleId);
 
@@ -212,6 +213,61 @@ export default function GradesPage() {
                   </div>
                 </div>
               ))}
+            </div>
+            <div className="mt-4 rounded-2xl border border-slate-200/60 bg-white/80 p-3 text-xs dark:border-white/10 dark:bg-ink-950">
+              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Add Range</p>
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                <input
+                  value={newRange.label}
+                  onChange={(event) => setNewRange({ ...newRange, label: event.target.value })}
+                  placeholder="Label"
+                  className="rounded-xl border border-slate-200/60 bg-white px-2 py-1 text-xs dark:border-white/10 dark:bg-ink-900"
+                />
+                <input
+                  type="number"
+                  value={newRange.min}
+                  onChange={(event) => setNewRange({ ...newRange, min: Number(event.target.value) })}
+                  placeholder="Min"
+                  className="rounded-xl border border-slate-200/60 bg-white px-2 py-1 text-xs dark:border-white/10 dark:bg-ink-900"
+                />
+                <input
+                  type="number"
+                  value={newRange.max}
+                  onChange={(event) => setNewRange({ ...newRange, max: Number(event.target.value) })}
+                  placeholder="Max"
+                  className="rounded-xl border border-slate-200/60 bg-white px-2 py-1 text-xs dark:border-white/10 dark:bg-ink-900"
+                />
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!activeScale || !newRange.label.trim()) return;
+                    const updated = {
+                      ...activeScale,
+                      ranges: [
+                        ...activeScale.ranges,
+                        { label: newRange.label.trim(), min: newRange.min, max: newRange.max },
+                      ],
+                    };
+                    updateGradeScale(updated);
+                    setNewRange({ label: "", min: 0, max: 0 });
+                  }}
+                  className="btn rounded-full border border-slate-200/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:text-sand-200"
+                >
+                  Add Range
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!activeScale) return;
+                    updateGradeScale({ ...activeScale, ranges: [] });
+                  }}
+                  className="btn rounded-full border border-rose-200/60 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 dark:border-rose-200/20 dark:text-rose-200"
+                >
+                  Clear All
+                </button>
+              </div>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               {presetScales.map((scale) => (
