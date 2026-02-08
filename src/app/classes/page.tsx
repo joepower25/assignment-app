@@ -9,7 +9,7 @@ import { ClassItem } from "@/lib/types";
 const palette = ["#38bdf8", "#f59e0b", "#a78bfa", "#22c55e", "#f97316", "#14b8a6"];
 
 export default function ClassesPage() {
-  const { state, addClass, updateClass } = useAppStore();
+  const { state, addClass, updateClass, deleteClass } = useAppStore();
   const [draft, setDraft] = useState<ClassItem>({
     id: uid("class"),
     name: "",
@@ -22,6 +22,7 @@ export default function ClassesPage() {
     resources: [],
     syllabusUploads: [],
   });
+  const [deleteTarget, setDeleteTarget] = useState<ClassItem | null>(null);
 
   const handleSubmit = () => {
     if (!draft.name.trim()) return;
@@ -38,6 +39,35 @@ export default function ClassesPage() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-6 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-slate-200/40 bg-white/95 p-6 shadow-2xl dark:border-white/10 dark:bg-ink-900/95">
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-sand-50">Delete Class</h3>
+            <p className="mt-2 text-sm text-slate-500 dark:text-sand-200">
+              This action cannot be undone. All assignments in this class will also be removed.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="btn flex-1 rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  deleteClass(deleteTarget.id);
+                  setDeleteTarget(null);
+                }}
+                className="btn flex-1 rounded-full bg-rose-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white"
+              >
+                Okay, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <section className="space-y-4">
         {state.classes.map((cls) => (
           <div
@@ -57,12 +87,21 @@ export default function ClassesPage() {
                 </p>
                 <p className="text-xs text-slate-400">Office Hours: {cls.officeHours || "TBD"}</p>
               </div>
-              <Link
-                href={`/classes/${cls.id}`}
-                className="btn rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
-              >
-                Manage
-              </Link>
+              <div className="flex flex-wrap items-center gap-2">
+                <Link
+                  href={`/classes/${cls.id}`}
+                  className="btn rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+                >
+                  Manage
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setDeleteTarget(cls)}
+                  className="btn rounded-full border border-rose-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600 dark:border-rose-200/20 dark:bg-ink-900 dark:text-rose-200"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
             <div className="mt-4 grid gap-3 text-xs text-slate-500 dark:text-sand-200 sm:grid-cols-2">
               <p>Credits: {cls.credits}</p>

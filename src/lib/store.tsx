@@ -19,6 +19,7 @@ type AppStore = {
   setUser: (user: UserProfile) => void;
   addClass: (item: ClassItem) => void;
   updateClass: (item: ClassItem) => void;
+  deleteClass: (id: string) => void;
   addAssignment: (item: Assignment) => void;
   updateAssignment: (item: Assignment) => void;
   deleteAssignment: (id: string) => void;
@@ -323,6 +324,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const deleteClassDb = async (id: string) => {
+    const { supabase, user } = await getSupabaseUser();
+    if (!user) return;
+    await supabase.from("classes").delete().eq("id", id);
+  };
+
   const persistAssignment = async (userId: string, assignment: Assignment) => {
     const { supabase } = await getSupabaseUser();
     await supabase.from("assignments").upsert({
@@ -484,6 +491,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         void withUser(async (_supabase, userId) => {
           await persistClass(userId, item);
         });
+      },
+      deleteClass: (id) => {
+        setState((prev) => ({
+          ...prev,
+          classes: prev.classes.filter((cls) => cls.id !== id),
+          assignments: prev.assignments.filter((assignment) => assignment.classId !== id),
+        }));
+        void deleteClassDb(id);
       },
       addAssignment: (item) => {
         setState((prev) => ({ ...prev, assignments: [item, ...prev.assignments] }));
