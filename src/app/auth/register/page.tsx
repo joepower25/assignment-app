@@ -20,7 +20,7 @@ export default function RegisterPage() {
     }
   };
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sand-50 via-white to-amber-50 px-6 dark:from-ink-950 dark:via-ink-900 dark:to-ink-950">
+    <div className="auth-bg flex min-h-screen items-center justify-center px-6">
       <div className="w-full max-w-md rounded-3xl border border-slate-200/40 bg-white/90 p-8 shadow-soft dark:border-white/10 dark:bg-ink-900/80">
         <h2 className="text-2xl font-semibold text-slate-900 dark:text-sand-50">Create an account</h2>
         <p className="mt-2 text-sm text-slate-500 dark:text-sand-200">Your data stays private to your account.</p>

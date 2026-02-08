@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { sum } from "@/lib/utils";
 
@@ -25,6 +25,29 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
   const { state } = useAppStore();
   const isAuth = pathname.startsWith("/auth");
   const isSetup = pathname.startsWith("/semester-setup");
+  const [sessionEmail, setSessionEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+
+    const init = async () => {
+      try {
+        const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
+        const supabase = createSupabaseBrowserClient();
+        const { data } = await supabase.auth.getSession();
+        setSessionEmail(data.session?.user?.email ?? null);
+        const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+          setSessionEmail(session?.user?.email ?? null);
+        });
+        unsubscribe = () => listener.subscription.unsubscribe();
+      } catch {
+        setSessionEmail(null);
+      }
+    };
+
+    void init();
+    return () => unsubscribe?.();
+  }, []);
 
   const active = useMemo(() => navItems.find((item) => pathname === item.href), [pathname]);
   const streak = useMemo(() => {
@@ -81,6 +104,36 @@ export const AppShell = ({ children }: { children: React.ReactNode }) => {
             <p className="text-xs uppercase tracking-[0.3em]">Streak</p>
             <p className="mt-2 text-2xl font-semibold">{streak} days</p>
             <p className="mt-1 text-xs">Keep the momentum. Complete 1 task today.</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            {!sessionEmail ? (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="btn rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-100 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200 dark:hover:bg-white/10"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="btn rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:-translate-y-0.5 hover:shadow-lg dark:bg-sand-200 dark:text-ink-900"
+                >
+                  Create Account
+                </Link>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={async () => {
+                  const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
+                  const supabase = createSupabaseBrowserClient();
+                  await supabase.auth.signOut();
+                }}
+                className="btn rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-100 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200 dark:hover:bg-white/10"
+              >
+                Logout
+              </button>
+            )}
           </div>
         </aside>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { addDays, formatDate, getToday, sum } from "@/lib/utils";
 
@@ -9,21 +9,6 @@ export default function HomePage() {
   const { state } = useAppStore();
   const today = getToday();
   const [pulse, setPulse] = useState<string | null>(null);
-  const [session, setSession] = useState<{ email?: string } | null>(null);
-
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
-        const supabase = createSupabaseBrowserClient();
-        const { data } = await supabase.auth.getSession();
-        setSession(data.session?.user ? { email: data.session.user.email ?? "" } : null);
-      } catch {
-        setSession(null);
-      }
-    };
-    init();
-  }, []);
 
   const dueToday = state.assignments.filter((a) => a.dueDate === today);
   const upcomingWeek = state.assignments.filter(
@@ -195,48 +180,6 @@ export default function HomePage() {
             </Link>
           </div>
         </Widget>
-      </section>
-
-      <section className="rounded-3xl border border-slate-200/40 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-ink-900/80">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Account</p>
-            <p className="text-sm text-slate-500 dark:text-sand-200">
-              {session?.email ? `Signed in as ${session.email}` : "Not signed in"}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {!session?.email ? (
-              <>
-                <Link
-                  href="/auth/login"
-                  className="btn rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-100 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200 dark:hover:bg-white/10"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="btn rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:-translate-y-0.5 hover:shadow-lg dark:bg-sand-200 dark:text-ink-900"
-                >
-                  Register
-                </Link>
-              </>
-            ) : (
-              <button
-                type="button"
-                onClick={async () => {
-                  const { createSupabaseBrowserClient } = await import("@/lib/supabase/client");
-                  const supabase = createSupabaseBrowserClient();
-                  await supabase.auth.signOut();
-                  window.location.reload();
-                }}
-                className="rounded-full border border-slate-200/60 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 transition hover:-translate-y-0.5 hover:bg-slate-100 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200 dark:hover:bg-white/10"
-              >
-                Logout
-              </button>
-            )}
-          </div>
-        </div>
       </section>
 
       <section className="rounded-3xl border border-slate-200/40 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-ink-900/80">
