@@ -19,6 +19,12 @@ export type StudyLog = {
   date: string;
 };
 
+export type Subtask = {
+  id: string;
+  title: string;
+  completed: boolean;
+};
+
 export type Assignment = {
   id: string;
   classId: string;
@@ -34,6 +40,7 @@ export type Assignment = {
   weight: number;
   grade?: number;
   completed: boolean;
+  subtasks: Subtask[];
   studyLogs: StudyLog[];
   createdAt: string;
   updatedAt: string;

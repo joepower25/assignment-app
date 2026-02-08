@@ -155,6 +155,13 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         weight: Number(assignment.weight ?? 0),
         grade: assignment.grade ?? undefined,
         completed: assignment.completed ?? false,
+        subtasks: Array.isArray(assignment.subtasks)
+          ? assignment.subtasks.map((subtask: any) => ({
+              id: subtask.id ?? uid("subtask"),
+              title: subtask.title ?? "",
+              completed: subtask.completed ?? false,
+            }))
+          : [],
         studyLogs: (logsByAssignment.get(assignment.id) ?? []).map((log) => ({
           id: log.id,
           minutes: log.minutes ?? 0,
@@ -331,6 +338,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       priority: assignment.priority,
       tags: assignment.tags,
       reminder_offsets: assignment.reminderOffsets,
+      subtasks: assignment.subtasks,
       weight: assignment.weight,
       grade: assignment.grade ?? null,
       completed: assignment.completed,

@@ -97,6 +97,11 @@ export const initialData: AppState = {
       weight: 15,
       grade: 92,
       completed: false,
+      subtasks: [
+        { id: "4e3a0a59-9dbe-4e21-8e09-7c7df3436a3d", title: "Research sources", completed: true },
+        { id: "1b2f8c7d-2c11-4f19-9a3c-7b2b5c57f2b7", title: "Draft summary", completed: false },
+        { id: "a6d4c0f2-8c7f-4d86-9d36-8e2d10c3f8f4", title: "Edit & polish", completed: false },
+      ],
       studyLogs: [
         { id: "45fbb4b5-b186-46f1-b09b-9b99a9df7f1e", minutes: 90, date: "2026-02-05" },
         { id: "9c3d48de-c2b0-4ae7-9c1b-5e4f4d3f2bb3", minutes: 60, date: "2026-02-06" },
@@ -119,6 +124,7 @@ export const initialData: AppState = {
       weight: 10,
       grade: 88,
       completed: true,
+      subtasks: [{ id: "0e7a8a7a-2f59-4e24-9a0f-2d2150a6d2a0", title: "Take quiz", completed: true }],
       studyLogs: [{ id: "0f2f8e9a-1c52-4b9f-8a97-0c6bb0d67f11", minutes: 45, date: "2026-02-06" }],
       createdAt: now,
       updatedAt: now,
@@ -137,6 +143,10 @@ export const initialData: AppState = {
       reminderOffsets: [10080, 2880, 1440],
       weight: 20,
       completed: false,
+      subtasks: [
+        { id: "b4f8d38a-41d9-4a75-9c99-6d6a1c4b1f2a", title: "Run gel electrophoresis", completed: false },
+        { id: "ab7c1a36-8e4d-4b1d-b7e6-9a2a6b7f5d1c", title: "Analyze results", completed: false },
+      ],
       studyLogs: [],
       createdAt: now,
       updatedAt: now,

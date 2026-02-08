@@ -108,6 +108,60 @@ export default function AssignmentDetailPage() {
           </div>
         </div>
       </section>
+
+      <section className="rounded-3xl border border-slate-200/40 bg-white/80 p-6 shadow-sm dark:border-white/10 dark:bg-ink-900/80">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h4 className="text-lg font-semibold">Subtasks</h4>
+          {assignment.subtasks.length > 0 && (
+            <p className="text-xs text-slate-400">
+              {assignment.subtasks.filter((task) => task.completed).length}/{assignment.subtasks.length} completed
+            </p>
+          )}
+        </div>
+        <div className="mt-4 space-y-2 text-sm">
+          {assignment.subtasks.map((task) => (
+            <label
+              key={task.id}
+              className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200/60 px-3 py-2"
+            >
+              <span className="flex flex-1 items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() =>
+                    updateAssignment({
+                      ...assignment,
+                      subtasks: assignment.subtasks.map((item) =>
+                        item.id === task.id ? { ...item, completed: !item.completed } : item
+                      ),
+                      updatedAt: new Date().toISOString(),
+                    })
+                  }
+                />
+                <input
+                  value={task.title}
+                  onChange={(event) => {
+                    const title = event.target.value;
+                    updateAssignment({
+                      ...assignment,
+                      subtasks: assignment.subtasks.map((item) =>
+                        item.id === task.id ? { ...item, title } : item
+                      ),
+                      updatedAt: new Date().toISOString(),
+                    });
+                  }}
+                  className={`w-full bg-transparent text-sm focus:outline-none ${
+                    task.completed ? "text-slate-400 line-through" : ""
+                  }`}
+                />
+              </span>
+            </label>
+          ))}
+          {assignment.subtasks.length === 0 && (
+            <p className="text-slate-500 dark:text-sand-200">No subtasks yet.</p>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

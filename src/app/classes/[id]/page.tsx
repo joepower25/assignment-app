@@ -81,6 +81,7 @@ export default function ClassDetailPage() {
             reminderOffsets: [2880, 1440],
             weight: item.type === "exam" ? 30 : 10,
             completed: false,
+            subtasks: [],
             studyLogs: [],
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

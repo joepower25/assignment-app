@@ -72,6 +72,7 @@ create table if not exists assignments (
   priority text,
   tags text[] default '{}',
   reminder_offsets int[] default '{}',
+  subtasks jsonb default '[]'::jsonb,
   weight numeric default 0,
   grade numeric,
   completed boolean default false,

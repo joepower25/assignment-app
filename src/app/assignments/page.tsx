@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { Assignment, StatusTag } from "@/lib/types";
 import { formatDate, uid } from "@/lib/utils";
@@ -36,6 +36,7 @@ export default function AssignmentsPage() {
       reminderOffsets: [2880, 1440],
       weight: 10,
       completed: false,
+      subtasks: [],
       studyLogs: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -79,6 +80,7 @@ export default function AssignmentsPage() {
       grade: assignment.grade ?? undefined,
       dueDate: assignment.dueDate || new Date().toISOString().slice(0, 10),
       dueTime: assignment.dueTime || "23:59",
+      subtasks: assignment.subtasks ?? [],
     });
   };
 
@@ -219,6 +221,12 @@ export default function AssignmentsPage() {
                     {tag}
                   </span>
                 ))}
+                {assignment.subtasks.length > 0 && (
+                  <span className="rounded-full border border-slate-200/60 px-3 py-1 text-xs text-slate-500 dark:text-sand-200">
+                    Subtasks {assignment.subtasks.filter((task) => task.completed).length}/
+                    {assignment.subtasks.length}
+                  </span>
+                )}
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-slate-500 dark:text-sand-200">
                 <span>Weight: {assignment.weight}%</span>
@@ -281,6 +289,12 @@ const AssignmentForm = ({
   primaryLabel: string;
   onPrimary: () => void;
 }) => {
+  const [subtaskTitle, setSubtaskTitle] = useState("");
+
+  useEffect(() => {
+    setSubtaskTitle("");
+  }, [draft.id]);
+
   const toggleReminder = (value: number) => {
     setDraft((prev) => ({
       ...prev,
@@ -425,6 +439,81 @@ const AssignmentForm = ({
         placeholder="Grade (optional)"
         className="rounded-2xl border border-slate-200/60 bg-white px-4 py-3 dark:border-white/10 dark:bg-ink-950"
       />
+      <div className="space-y-2">
+        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Subtasks</p>
+        {draft.subtasks.length > 0 && (
+          <div className="space-y-2">
+            {draft.subtasks.map((task) => (
+              <div key={task.id} className="flex items-center justify-between gap-2 rounded-2xl border border-slate-200/60 px-3 py-2 text-xs">
+                <label className="flex flex-1 items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={task.completed}
+                    onChange={() =>
+                      setDraft((prev) => ({
+                        ...prev,
+                        subtasks: prev.subtasks.map((item) =>
+                          item.id === task.id ? { ...item, completed: !item.completed } : item
+                        ),
+                      }))
+                    }
+                  />
+                  <input
+                    value={task.title}
+                    onChange={(event) => {
+                      const title = event.target.value;
+                      setDraft((prev) => ({
+                        ...prev,
+                        subtasks: prev.subtasks.map((item) =>
+                          item.id === task.id ? { ...item, title } : item
+                        ),
+                      }));
+                    }}
+                    className={`w-full bg-transparent text-xs focus:outline-none ${
+                      task.completed ? "text-slate-400 line-through" : ""
+                    }`}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDraft((prev) => ({
+                      ...prev,
+                      subtasks: prev.subtasks.filter((item) => item.id !== task.id),
+                    }))
+                  }
+                  className="text-[10px] uppercase tracking-[0.2em] text-rose-500"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input
+            value={subtaskTitle}
+            onChange={(event) => setSubtaskTitle(event.target.value)}
+            placeholder="Add a subtask"
+            className="flex-1 rounded-2xl border border-slate-200/60 bg-white px-4 py-3 text-sm dark:border-white/10 dark:bg-ink-950"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const title = subtaskTitle.trim();
+              if (!title) return;
+              setDraft((prev) => ({
+                ...prev,
+                subtasks: [...prev.subtasks, { id: uid("subtask"), title, completed: false }],
+              }));
+              setSubtaskTitle("");
+            }}
+            className="btn rounded-full border border-slate-200/60 bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-slate-600 dark:border-white/10 dark:bg-ink-900 dark:text-sand-200"
+          >
+            Add
+          </button>
+        </div>
+      </div>
       <div className="flex gap-2">
         <button
           type="button"
